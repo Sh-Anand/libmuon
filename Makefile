@@ -28,7 +28,6 @@ MU_CP  = $(LLVM)/bin/llvm-objcopy
 CFLAGS += -O3 -mcmodel=medany -fno-exceptions -nostartfiles -nostdlib -fdata-sections -ffunction-sections
 CFLAGS += -I./include
 CFLAGS += -DXLEN_$(XLEN)
-CFLAGS += -DPRINTF_USE_FLOAT_INSTEAD_OF_DOUBLE
 
 VX_CFLAGS := $(CFLAGS)
 VX_CFLAGS += -mllvm -inline-threshold=262144
