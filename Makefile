@@ -2,7 +2,7 @@ CFLAGS += -march=rv32im_zfinx -mabi=ilp32
 
 LLVM ?= /home/shashank/radiance/radiance-llvm/build/
 
-LLVM_CFLAGS += --sysroot=$(RISCV_32)/riscv32-unknown-elf --gcc-toolchain=$(RISCV_32) --target=riscv32-unknown-elf
+LLVM_CFLAGS += --sysroot=$(MUON) --target=riscv32-unknown-elf
 LLVM_CFLAGS += -Xclang -target-feature -Xclang +vortex -mllvm -vortex-branch-divergence=0
 #LLVM_CFLAGS += -I$(RISCV_SYSROOT)/include/c++/9.2.0/$(RISCV_PREFIX) 
 #LLVM_CFLAGS += -I$(RISCV_SYSROOT)/include/c++/9.2.0
@@ -20,10 +20,10 @@ AR  = $(RISCV_32)/bin/riscv32-unknown-elf-gcc-ar
 # DP  = $(RISCV_TOOLCHAIN_PATH)/bin/$(RISCV_PREFIX)-objdump
 # CP  = $(RISCV_TOOLCHAIN_PATH)/bin/$(RISCV_PREFIX)-objcopy
 
-MU_CC  = $(LLVM)/bin/clang $(LLVM_CFLAGS)
-MU_CXX = $(LLVM)/bin/clang++ $(LLVM_CFLAGS)
-MU_DP  = $(LLVM)/bin/llvm-objdump
-MU_CP  = $(LLVM)/bin/llvm-objcopy
+MU_CC  = $(MUON)/bin/clang $(LLVM_CFLAGS)
+MU_CXX = $(MUON)/bin/clang++ $(LLVM_CFLAGS)
+MU_DP  = $(MUON)/bin/llvm-objdump
+MU_CP  = $(MUON)/bin/llvm-objcopy
 
 CFLAGS += -O3 -mcmodel=medany -fno-exceptions -nostartfiles -nostdlib -fdata-sections -ffunction-sections
 CFLAGS += -I./include
@@ -31,11 +31,10 @@ CFLAGS += -DXLEN_$(XLEN)
 
 VX_CFLAGS := $(CFLAGS)
 VX_CFLAGS += -mllvm -inline-threshold=262144
-VX_CFLAGS += -I$(VORTEX_KN_PATH)/include
 VX_CFLAGS += -DNDEBUG -DLLVM_VORTEX
 
 MU_CFLAGS := $(VX_CFLAGS)
-MU_CFLAGS += -fuse-ld=lld
+MU_CFLAGS += -fuse-ld=lld -lm -lc
 
 PROJECT = libmuon
 

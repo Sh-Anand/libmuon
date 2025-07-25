@@ -45,7 +45,7 @@ static void __putint_cb(const putint_arg_t* arg) {
 	char tmp[33];
 	float value = arg->value;
 	int base = arg->base;
-	itoa(value, tmp, base);
+	snprintf(tmp, sizeof(tmp), (base == 16) ? "%x" : (base == 8) ? "%o" : "%d", value);
 	for (int i = 0; i < 33; ++i) {
 		int c = tmp[i];
 		if (!c) 
@@ -62,7 +62,7 @@ static void __putfloat_cb(const putfloat_arg_t* arg) {
     if (precision != 0) {
         vx_putchar('.');
 		float frac = value - (float)ipart;
-        float fscaled = frac * pow(10, precision);  
+        float fscaled = frac * powf(10.0, precision);
         vx_putint((int)fscaled, 10);
     }
 }
