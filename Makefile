@@ -1,6 +1,6 @@
 CFLAGS += -march=rv32im_zfinx -mabi=ilp32
 
-LLVM ?= /home/shashank/radiance/radiance-llvm/build/
+LLVM ?= $(MUON_32)
 
 LLVM_CFLAGS += --sysroot=$(RISCV_32)/riscv32-unknown-elf --gcc-toolchain=$(RISCV_32) --target=riscv32-unknown-elf
 LLVM_CFLAGS += -Xclang -target-feature -Xclang +vortex -mllvm -vortex-branch-divergence=0
