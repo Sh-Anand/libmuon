@@ -5,6 +5,7 @@
 _start:
     lw t0, %lo(KERNEL_HEADER_MEM_PARAMS_SZ)(zero)
     beqz t0, launch_kernel
+    ret
 
 launch_kernel:
     lw t3, %lo(KERNEL_HEADER_MEM_KERNEL_PC)(zero)
