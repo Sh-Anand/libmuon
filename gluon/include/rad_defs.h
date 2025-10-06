@@ -1,5 +1,9 @@
+#define GPU_MEM_START_ADDR 0x2000
+
 #define GPU_DRAM_SIZE (512 * 1024 * 1024)
-#define KERNEL_HEADER_MEM_START_PC 0 // [0:3], 4 bytes
+
+// all below offset by gpu mem start addr
+#define KERNEL_HEADER_MEM_START_PC GPU_MEM_START_ADDR // [0:3], 4 bytes
 #define KERNEL_HEADER_MEM_KERNEL_PC (KERNEL_HEADER_MEM_START_PC + 4) // [4:7], 4 bytes
 #define KERNEL_HEADER_MEM_PARAMS_SZ (KERNEL_HEADER_MEM_KERNEL_PC + 4) // [8:11], 4 bytes
 #define KERNEL_HEADER_MEM_BINARY_SZ (KERNEL_HEADER_MEM_PARAMS_SZ + 4) // [12:15], 4 bytes
