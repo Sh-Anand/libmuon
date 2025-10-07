@@ -3,7 +3,8 @@
 .global _start
 .type _start, @function
 _start:
-    li t0, KERNEL_HEADER_MEM_PARAMS_SZ
+    li t3, KERNEL_HEADER_MEM_PARAMS_SZ
+    lw t0, 0(t3)
     beqz t0, launch_kernel
     li t1, KERNEL_MEM_PARAMS_START
     mv t2, zero
