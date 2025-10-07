@@ -31,7 +31,7 @@ CFLAGS += -DXLEN_$(XLEN)
 
 VX_CFLAGS := $(CFLAGS)
 VX_CFLAGS += -mllvm -inline-threshold=262144
-VX_CFLAGS += -I$(VORTEX_KN_PATH)/include
+VX_CFLAGS += -I./include
 VX_CFLAGS += -DNDEBUG -DLLVM_VORTEX
 
 MU_CFLAGS := $(VX_CFLAGS)
@@ -39,7 +39,7 @@ MU_CFLAGS += -fuse-ld=lld
 
 PROJECT = libmuon
 
-SRCS = ./src/rad_start.S
+SRCS = ./src/rad_start.S ./src/vx_print.S ./src/vx_print.c ./src/tinyprintf.c ./src/vx_spawn.c ./src/vx_serial.S
 
 OBJS := $(addsuffix .o, $(notdir $(SRCS)))
 
@@ -51,10 +51,10 @@ $(PROJECT).dump: $(PROJECT).a
 %.S.o: src/%.S
 	$(MU_CC) $(MU_CFLAGS) -c $< -o $@
 
-%.cpp.o: src/%.cpp include/vx_spawn.h
+%.cpp.o: src/%.cpp
 	$(MU_CXX) $(MU_CFLAGS) -c $< -o $@
 
-%.c.o: src/%.c include/vx_spawn.h
+%.c.o: src/%.c
 	$(MU_CC) $(MU_CFLAGS) -c $< -o $@
 
 $(PROJECT).a: $(OBJS)
