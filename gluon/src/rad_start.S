@@ -45,7 +45,7 @@ _start:
     mul t1, t1, tp // stack offset for this thread
     sub sp, t0, t1 // stack pointer
 
-setup_params:
+// setup params
     li t0, KERNEL_HEADER_MEM_PARAMS_SZ
     lw t0, 0(t0)
     beqz t0, launch_kernel
@@ -83,6 +83,17 @@ setup_params:
     lw a7, 28(t1)
     addi t2, t2, 4
     beq t2, t0, launch_kernel
+
+    mv t3, zero
+
+setup_params_stack:
+    add t1, t1, t2
+    sub t4, sp, t3
+    lw t5, 0(t1)
+    sw t5, 0(t4)
+    addi t3, t3, 4
+    addi t2, t2, 4
+    blt t2, t0, setup_params_stack
 
 launch_kernel:
     lw t3, %lo(KERNEL_HEADER_MEM_KERNEL_PC)(zero)
