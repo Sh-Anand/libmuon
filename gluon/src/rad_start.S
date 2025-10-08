@@ -3,7 +3,6 @@
 .global _start
 .type _start, @function
 _start:
-// setup tp
     csrr t0, CSR_BLOCK_IDX_X
     csrr t1, CSR_BLOCK_IDX_Y
     csrr t2, CSR_BLOCK_IDX_Z
@@ -35,7 +34,14 @@ _start:
     add a2, a2, t0 // add blockIdx.x
     mul a2, a2, a0 // convert block coordinates to thread offset
     add a0, a1, a2 // flat thread index across grid
-    mv tp, a0 // flat thread index in tp
+
+// setup tls
+    li t0, KERNEL_HEADER_MEM_TLS_BASE_ADDR
+    lw t0, 0(t0)
+    li t1, KERNEL_TLS_SIZE
+    div t1, t1, t12 // tls size per thread
+    mul t1, t1, tp // tls offset for this thread
+    add tp, t0, t1 // tls pointer
 
 // setup stack
     li t0, KERNEL_HEADER_MEM_STACK_BASE_ADDR
