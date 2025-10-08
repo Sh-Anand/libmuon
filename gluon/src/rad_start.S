@@ -3,8 +3,51 @@
 .global _start
 .type _start, @function
 _start:
-    li t3, KERNEL_HEADER_MEM_PARAMS_SZ
-    lw t0, 0(t3)
+// setup tp
+    csrr t0, CSR_BLOCK_IDX_X
+    csrr t1, CSR_BLOCK_IDX_Y
+    csrr t2, CSR_BLOCK_IDX_Z
+    csrr t3, CSR_THREAD_IDX_X
+    csrr t4, CSR_THREAD_IDX_Y
+    csrr t5, CSR_THREAD_IDX_Z
+    
+    li t6, KERNEL_HEADER_MEM_GRID_X
+    lw t7, 0(t6) // kernel grid x
+    lw t8, 4(t6) // kernel grid y
+    lw t9, 8(t6) // kernel grid z
+    lw t10, 12(t6) // kernel block x
+    lw t11, 16(t6) // kernel block y   
+    lw t12, 20(t6) // kernel block z
+
+    mul a0, t12, t11 // threads per block in yz plane
+    mul a0, a0, t10 // total threads per block
+    mul t13, a0, t9
+    mul t13, t13, t8
+    mul t13, t13, t7 // total threads in kernel (grid * block)
+
+    mul a1, t5, t10 // z offset within block scaled by blockDim.y
+    add a1, a1, t4 // combine with threadIdx.y
+    mul a1, a1, t9 // scale by blockDim.x
+    add a1, a1, t3 // add threadIdx.x for intra-block index
+    mul a2, t2, t7 // blockIdx.z contribution scaled by gridDim.y
+    add a2, a2, t1 // combine with blockIdx.y
+    mul a2, a2, t6 // scale by gridDim.x
+    add a2, a2, t0 // add blockIdx.x
+    mul a2, a2, a0 // convert block coordinates to thread offset
+    add a0, a1, a2 // flat thread index across grid
+    mv tp, a0 // flat thread index in tp
+
+// setup stack
+    li t0, KERNEL_HEADER_MEM_STACK_BASE_ADDR
+    lw t0, 0(t0)
+    li t1, KERNEL_STACK_SIZE
+    div t1, t1, t12 // stack size per thread
+    mul t1, t1, tp // stack offset for this thread
+    sub sp, t0, t1 // stack pointer
+
+setup_params:
+    li t0, KERNEL_HEADER_MEM_PARAMS_SZ
+    lw t0, 0(t0)
     beqz t0, launch_kernel
     li t1, KERNEL_MEM_PARAMS_START
     mv t2, zero
