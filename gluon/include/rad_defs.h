@@ -1,4 +1,5 @@
 #define GPU_MEM_START_ADDR 0x2000
+#define KERNEL_LOAD_ADDR 0x10000
 
 #define GPU_DRAM_SIZE (1 << 29) // 512MB
 
@@ -39,3 +40,5 @@
 #define CSR_THREAD_IDX_X 0xfc6
 #define CSR_THREAD_IDX_Y 0xfc7
 #define CSR_THREAD_IDX_Z 0xfc8
+
+#define IO_COUT 0xFF080000

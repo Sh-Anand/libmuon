@@ -39,7 +39,7 @@ MU_CFLAGS += -fuse-ld=lld
 
 PROJECT = libmuon
 
-SRCS = ./src/rad_start.S ./src/vx_print.S ./src/vx_print.c ./src/tinyprintf.c ./src/vx_spawn.c ./src/vx_serial.S
+SRCS = ./src/rad_start.S ./src/rad_print.c ./src/tinyprintf.c
 
 OBJS := $(addsuffix .o, $(notdir $(SRCS)))
 

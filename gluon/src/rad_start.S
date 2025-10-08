@@ -39,16 +39,16 @@ _start:
     li t0, KERNEL_HEADER_MEM_TLS_BASE_ADDR
     lw t0, 0(t0)
     li t1, KERNEL_TLS_SIZE
-    div t1, t1, t12 // tls size per thread
-    mul t1, t1, tp // tls offset for this thread
+    div t1, t1, t13 // tls size per thread
+    mul t1, t1, a0 // tls offset for this thread
     add tp, t0, t1 // tls pointer
 
 // setup stack
     li t0, KERNEL_HEADER_MEM_STACK_BASE_ADDR
     lw t0, 0(t0)
     li t1, KERNEL_STACK_SIZE
-    div t1, t1, t12 // stack size per thread
-    mul t1, t1, tp // stack offset for this thread
+    div t1, t1, t13 // stack size per thread
+    mul t1, t1, a0 // stack offset for this thread
     sub sp, t0, t1 // stack pointer
 
 // setup params

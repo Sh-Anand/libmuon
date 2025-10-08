@@ -33,7 +33,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "tinyprintf.h"
-#include "vx_print.h"
 
 
 // define this globally (e.g. gcc -DPRINTF_INCLUDE_CONFIG_H ...) to include the
@@ -150,7 +149,7 @@ static inline void _out_char(char character, void* buffer, size_t idx, size_t ma
 {
   (void)buffer; (void)idx; (void)maxlen;
   if (character) {
-    vx_putchar(character);
+    //vx_putchar(character);
   }
 }
 
