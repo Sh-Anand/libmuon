@@ -93,10 +93,10 @@ _start:
     mv t3, zero
 
 setup_params_stack:
-    add t1, t1, t2
-    sub t4, sp, t3
-    lw t5, 0(t1)
-    sw t5, 0(t4)
+    add t4, t1, t2
+    add t6, sp, t3
+    lw t5, 0(t4)
+    sw t5, 0(t6)
     addi t3, t3, 4
     addi t2, t2, 4
     blt t2, t0, setup_params_stack
