@@ -24,13 +24,13 @@ _start:
     mul t13, t13, t8
     mul t13, t13, t7 // total threads in kernel (grid * block)
 
-    mul a1, t5, t10 // z offset within block scaled by blockDim.y
-    add a1, a1, t4 // combine with threadIdx.y
-    mul a1, a1, t9 // scale by blockDim.x
-    add a1, a1, t3 // add threadIdx.x for intra-block index
-    mul a2, t2, t7 // blockIdx.z contribution scaled by gridDim.y
+    mul a1, t5, t11 // threadIdx.z * blockDim.y
+    add a1, a1, t4 // + threadIdx.y
+    mul a1, a1, t10 // * blockDim.x
+    add a1, a1, t3 // + threadIdx.x (intra-block index)
+    mul a2, t2, t8 // blockIdx.z contribution scaled by gridDim.y
     add a2, a2, t1 // combine with blockIdx.y
-    mul a2, a2, t6 // scale by gridDim.x
+    mul a2, a2, t7 // scale by gridDim.x
     add a2, a2, t0 // add blockIdx.x
     mul a2, a2, a0 // convert block coordinates to thread offset
     add a0, a1, a2 // flat thread index across grid
@@ -102,5 +102,6 @@ setup_params_stack:
     blt t2, t0, setup_params_stack
 
 launch_kernel:
-    lw t3, %lo(KERNEL_HEADER_MEM_KERNEL_PC)(zero)
+    li t4, KERNEL_HEADER_MEM_KERNEL_PC
+    lw t3, 0(t4)
     jalr x0, t3, 0
