@@ -55,7 +55,7 @@ _start:
     li t0, KERNEL_HEADER_MEM_PARAMS_SZ
     lw t0, 0(t0)
     beqz t0, launch_kernel
-    li t1, KERNEL_MEM_PARAMS_START
+    csrr t1, CSR_PP
     mv t2, zero
     
     lw a0, 0(t1)
@@ -104,4 +104,5 @@ setup_params_stack:
 launch_kernel:
     li t4, KERNEL_HEADER_MEM_KERNEL_PC
     lw t3, 0(t4)
+    mv ra, zero
     jalr x0, t3, 0

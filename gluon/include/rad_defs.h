@@ -41,5 +41,6 @@
 #define CSR_THREAD_IDX_X 0xfc6
 #define CSR_THREAD_IDX_Y 0xfc7
 #define CSR_THREAD_IDX_Z 0xfc8
+#define CSR_PP 0xfc9
 
 #define IO_COUT 0xFF080000
