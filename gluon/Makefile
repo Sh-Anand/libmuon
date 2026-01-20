@@ -34,7 +34,7 @@ VX_CFLAGS += -mllvm -inline-threshold=262144
 VX_CFLAGS += -I./include
 VX_CFLAGS += -DNDEBUG -DLLVM_VORTEX
 
-MU_CFLAGS := $(VX_CFLAGS)
+MU_CFLAGS := $(VX_CFLAGS) -fPIC
 MU_CFLAGS += -fuse-ld=lld
 
 PROJECT = libmuon
