@@ -2,7 +2,7 @@
 #define KERNEL_HEADER_START_ADDR 0x10000000
 #define KERNEL_LOAD_ADDR         0x10001000
 
-#define GPU_DRAM_SIZE (1 << 40) // 1TB
+#define GPU_DRAM_SIZE (1ULL << 32) // 4GB
 
 #define KERNEL_STACK_SIZE (1 << 22) // 4MB
 #define KERNEL_TLS_SIZE (1 << 22) // 4MB
