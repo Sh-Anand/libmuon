@@ -25,7 +25,7 @@ MU_CXX = $(LLVM)/bin/clang++ $(LLVM_CFLAGS)
 MU_DP  = $(LLVM)/bin/llvm-objdump
 MU_CP  = $(LLVM)/bin/llvm-objcopy
 
-CFLAGS += -O3 -mcmodel=medany -fno-exceptions -nostartfiles -nostdlib -fdata-sections -ffunction-sections
+CFLAGS += -O3 -mcmodel=medany -fno-exceptions -nostartfiles -nostdlib -fdata-sections -ffunction-sections -fPIC -fno-builtin-memset -fno-builtin-memcpy
 CFLAGS += -I./include
 CFLAGS += -DXLEN_$(XLEN)
 
@@ -34,7 +34,7 @@ VX_CFLAGS += -mllvm -inline-threshold=262144
 VX_CFLAGS += -I./include
 VX_CFLAGS += -DNDEBUG -DLLVM_VORTEX
 
-MU_CFLAGS := $(VX_CFLAGS) -fPIC
+MU_CFLAGS := $(VX_CFLAGS)
 MU_CFLAGS += -fuse-ld=lld
 
 PROJECT = libmuon
