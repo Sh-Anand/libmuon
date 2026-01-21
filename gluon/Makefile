@@ -25,7 +25,8 @@ MU_CXX = $(LLVM)/bin/clang++ $(LLVM_CFLAGS)
 MU_DP  = $(LLVM)/bin/llvm-objdump
 MU_CP  = $(LLVM)/bin/llvm-objcopy
 
-CFLAGS += -O3 -mcmodel=medany -fno-exceptions -nostartfiles -nostdlib -fdata-sections -ffunction-sections -fPIC -fno-builtin-memset -fno-builtin-memcpy
+CFLAGS += -O3 -mcmodel=medany -nostartfiles -nostdlib -fdata-sections -ffunction-sections -fPIC 
+CFLAGS += -fno-exceptions -fno-builtin-memset -fno-builtin-memcpy -fno-unwind-tables -fno-asynchronous-unwind-tables
 CFLAGS += -I./include
 CFLAGS += -DXLEN_$(XLEN)
 
