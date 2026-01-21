@@ -10,7 +10,8 @@ _start:
     csrr t4, CSR_THREAD_IDX_Y
     csrr t5, CSR_THREAD_IDX_Z
     
-    li t6, KERNEL_HEADER_MEM_GRID_X
+    csrr t15, CSR_BP
+    addi t6, t15, KERNEL_HEADER_MEM_GRID_X
     lw t7, 0(t6) // kernel grid x
     lw t8, 4(t6) // kernel grid y
     lw t9, 8(t6) // kernel grid z
@@ -36,7 +37,7 @@ _start:
     add a0, a1, a2 // flat thread index across grid
 
 // setup tls
-    li t0, KERNEL_HEADER_MEM_TLS_BASE_ADDR
+    addi t0, t15, KERNEL_HEADER_MEM_TLS_BASE_ADDR
     lw t0, 0(t0)
     li t1, KERNEL_TLS_SIZE
     div t1, t1, t13 // tls size per thread
@@ -44,7 +45,7 @@ _start:
     add tp, t0, t1 // tls pointer
 
 // setup stack
-    li t0, KERNEL_HEADER_MEM_STACK_BASE_ADDR
+    addi t0, t15, KERNEL_HEADER_MEM_STACK_BASE_ADDR
     lw t0, 0(t0)
     li t1, KERNEL_STACK_SIZE
     div t1, t1, t13 // stack size per thread
@@ -52,10 +53,10 @@ _start:
     sub sp, t0, t1 // stack pointer
 
 // setup params
-    li t0, KERNEL_HEADER_MEM_PARAMS_SZ
+    addi t0, t15, KERNEL_HEADER_MEM_PARAMS_SZ
     lw t0, 0(t0)
     beqz t0, launch_kernel
-    csrr t1, CSR_PP
+    addi t1, t15, KERNEL_HEADER_MEM_END
     mv t2, zero
     
     lw a0, 0(t1)
@@ -102,7 +103,7 @@ setup_params_stack:
     blt t2, t0, setup_params_stack
 
 launch_kernel:
-    li t4, KERNEL_HEADER_MEM_KERNEL_PC
+    addi t4, t15, KERNEL_HEADER_MEM_KERNEL_PC
     lw t3, 0(t4)
     mv ra, zero
     jalr x0, t3, 0
