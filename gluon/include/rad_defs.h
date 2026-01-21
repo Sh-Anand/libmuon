@@ -1,6 +1,4 @@
 #define GPU_MEM_START_ADDR       0x100
-#define KERNEL_HEADER_START_ADDR 0x10000000
-#define KERNEL_LOAD_ADDR         0x10001000
 
 #define GPU_DRAM_SIZE (1ULL << 32) // 4GB
 
@@ -8,7 +6,7 @@
 #define KERNEL_TLS_SIZE (1 << 22) // 4MB
 
 // all below offset by gpu mem start addr
-#define KERNEL_HEADER_MEM_START_PC KERNEL_HEADER_START_ADDR // [0:3], 4 bytes
+#define KERNEL_HEADER_MEM_START_PC 0 // [0:3], 4 bytes
 #define KERNEL_HEADER_MEM_KERNEL_PC (KERNEL_HEADER_MEM_START_PC + 4) // [4:7], 4 bytes
 #define KERNEL_HEADER_MEM_PARAMS_SZ (KERNEL_HEADER_MEM_KERNEL_PC + 4) // [8:11], 4 bytes
 #define KERNEL_HEADER_MEM_BINARY_SZ (KERNEL_HEADER_MEM_PARAMS_SZ + 4) // [12:15], 4 bytes
@@ -28,7 +26,6 @@
 #define KERNEL_HEADER_MEM_PADDING (4 - ((KERNEL_HEADER_MEM_FLAGS + 1) & 3)) // [62:63], 2 bytes of padding for 4 byte alignment
 #define KERNEL_HEADER_MEM_END (KERNEL_HEADER_MEM_FLAGS + 1 + KERNEL_HEADER_MEM_PADDING) // [64] 
 
-#define KERNEL_HEADER_BYTES 64
 #define KERNEL_REGS_PER_THREAD 1
 #define KERNEL_SMEM_PER_BLOCK 1
 #define KERNEL_FLAGS 0
