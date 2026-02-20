@@ -39,4 +39,6 @@
 #define CSR_THREAD_IDX_Z 0xfc8
 #define CSR_BP 0xfc9
 
+#define HW_STREAM_COUNT 4
+
 #define IO_COUT 0xFF080000
