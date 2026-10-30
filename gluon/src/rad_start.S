@@ -41,6 +41,7 @@ _start:
     lw t0, 0(t0)
     li t1, KERNEL_TLS_SIZE
     div t1, t1, t13 // tls size per thread
+    andi t1, t1, -16 // align per-thread tls to 16 bytes
     mul t1, t1, a0 // tls offset for this thread
     add tp, t0, t1 // tls pointer
 
@@ -49,6 +50,7 @@ _start:
     lw t0, 0(t0)
     li t1, KERNEL_STACK_SIZE
     div t1, t1, t13 // stack size per thread
+    andi t1, t1, -16 // align per-thread stack to 16 bytes
     mul t1, t1, a0 // stack offset for this thread
     sub sp, t0, t1 // stack pointer
 
