@@ -25,7 +25,6 @@
 #define KERNEL_HEADER_MEM_END (KERNEL_HEADER_MEM_FLAGS + 1 + KERNEL_HEADER_MEM_PADDING) // [56] 
 
 #define KERNEL_REGS_PER_THREAD 1
-#define KERNEL_SMEM_PER_BLOCK 1
 #define KERNEL_FLAGS 0
 #define KERNEL_PRINTF_HOST_ADDR 0
 #define KERNEL_RESERVED_U16 0
@@ -42,4 +41,7 @@
 
 #define IO_COUT 0xFF080000
 
+// device only: glibc's pthread rwlock has a field named __shared
+#ifdef __riscv
 #define __shared __attribute__((address_space(1))) // lowers loads/stores to .shared
+#endif
