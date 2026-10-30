@@ -41,3 +41,5 @@
 #define HW_STREAM_COUNT 4
 
 #define IO_COUT 0xFF080000
+
+#define __shared __attribute__((address_space(1))) // lowers loads/stores to .shared
