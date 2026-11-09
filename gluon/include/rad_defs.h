@@ -46,4 +46,9 @@
 // device only: glibc's pthread rwlock has a field named __shared
 #ifdef __riscv
 #define __shared __attribute__((address_space(1))) // lowers loads/stores to .shared
+
+// vx_bar across the whole CTA
+__attribute__((convergent)) static inline void __syncthreads() {
+    asm volatile(".insn r 0x0b, 4, 0, x0, x0, x0" ::: "memory");
+}
 #endif
