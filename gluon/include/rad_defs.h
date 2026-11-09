@@ -36,6 +36,8 @@
 #define CSR_THREAD_IDX_Y 0xfc7
 #define CSR_THREAD_IDX_Z 0xfc8
 #define CSR_BP 0xfc9
+#define CSR_CMD_ID_LO 0xfcb // unique id of the launching command: stream id << 56 | per-stream command id
+#define CSR_CMD_ID_HI 0xfcc
 
 #define HW_STREAM_COUNT 4
 
