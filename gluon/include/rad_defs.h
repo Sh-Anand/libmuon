@@ -51,4 +51,15 @@
 __attribute__((convergent)) static inline void __syncthreads() {
     asm volatile(".insn r 0x0b, 4, 0, x0, x0, x0" ::: "memory");
 }
+
+// this thread's index within its block, and its block's index within the grid
+#define RAD_IDX(name, csr) \
+    static inline unsigned name(void) { unsigned v; asm volatile("csrr %0, %1" : "=r"(v) : "i"(csr)); return v; }
+RAD_IDX(rad_thread_idx_x, CSR_THREAD_IDX_X)
+RAD_IDX(rad_thread_idx_y, CSR_THREAD_IDX_Y)
+RAD_IDX(rad_thread_idx_z, CSR_THREAD_IDX_Z)
+RAD_IDX(rad_block_idx_x, CSR_BLOCK_IDX_X)
+RAD_IDX(rad_block_idx_y, CSR_BLOCK_IDX_Y)
+RAD_IDX(rad_block_idx_z, CSR_BLOCK_IDX_Z)
+#undef RAD_IDX
 #endif
