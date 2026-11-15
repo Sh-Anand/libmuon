@@ -43,8 +43,8 @@
 
 #define IO_COUT 0xFF080000
 
-// device only: glibc's pthread rwlock has a field named __shared
-#ifdef __riscv
+// device C only: glibc's pthread rwlock has a field named __shared, and rad_start.S includes this
+#if defined(__riscv) && !defined(__ASSEMBLER__)
 #define __shared __attribute__((address_space(1))) // lowers loads/stores to .shared
 
 // vx_bar across the whole CTA
