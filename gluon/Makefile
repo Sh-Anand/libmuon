@@ -29,6 +29,8 @@ CFLAGS += -O3 -mcmodel=medany -nostartfiles -nostdlib -fdata-sections -ffunction
 CFLAGS += -fno-exceptions -fno-builtin-memset -fno-builtin-memcpy -fno-unwind-tables -fno-asynchronous-unwind-tables
 CFLAGS += -I./include
 CFLAGS += -DXLEN_$(XLEN)
+# lane-interleaved stack; must match STACK_WORD_STRIDE in rad_defs.h
+CFLAGS += -mllvm -riscv-stack-word-stride=32
 
 VX_CFLAGS := $(CFLAGS)
 VX_CFLAGS += -mllvm -inline-threshold=262144

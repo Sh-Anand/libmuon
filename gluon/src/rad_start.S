@@ -1,6 +1,6 @@
 #include <rad_defs.h>
 
-// only touches ra, sp, tp, t0-t2, a0-a7: registers are never freed, so every
+// only touches ra, sp, gp, tp, t0-t2, a0-a7: registers are never freed, so every
 // register written here counts against each warp for the whole kernel
 
 .global _start
@@ -46,13 +46,27 @@ _start:
     mul t1, t1, a6 // tls offset for this thread
     add tp, t0, t1 // tls pointer
 
-// setup stack
+// setup stacks: the stack region's upper half holds a data stack per thread (gp), its lower half
+// the interleaved stacks (sp).  Frames are interleaved across a warp's lanes
+// (-riscv-stack-word-stride), so its lanes share one region with stack pointers 4 bytes apart;
+// gp holds what cannot be interleaved.
     lw t0, KERNEL_HEADER_MEM_STACK_BASE_ADDR(t2)
-    li t1, KERNEL_STACK_SIZE
-    div t1, t1, a5 // stack size per thread
-    andi t1, t1, -16 // align per-thread stack to 16 bytes
-    mul t1, t1, a6 // stack offset for this thread
-    sub sp, t0, t1 // stack pointer
+    li t1, KERNEL_STACK_SIZE / 2
+    div a0, t1, a5 // size per thread, of each stack
+    andi a0, a0, -16
+    mul a1, a0, a6
+    sub gp, t0, a1
+    andi gp, gp, -16 // data stack pointer
+    csrr a2, CSR_LANE_ID
+    sub a1, a6, a2 // the warp's first thread
+    mul a1, a0, a1
+    sub t0, t0, t1
+    sub a1, t0, a1
+    // top of the warp's region: 16 stack bytes are 4 words, so frames keep their alignment and
+    // va_arg can read a word's parity off its address
+    andi a1, a1, -(16 * STACK_WORD_STRIDE)
+    slli a2, a2, 2
+    add sp, a1, a2 // stack pointer
 
 // setup params: words past the first 8 go on the stack, then the first 8 into a0-a7
     lw t0, KERNEL_HEADER_MEM_PARAMS_SZ(t2)
@@ -66,7 +80,7 @@ setup_params_stack:
     lw a2, 0(a0)
     sw a2, 0(a1)
     addi a0, a0, 4
-    addi a1, a1, 4
+    addi a1, a1, 4 * STACK_WORD_STRIDE
     j setup_params_stack
 
 setup_params_regs:

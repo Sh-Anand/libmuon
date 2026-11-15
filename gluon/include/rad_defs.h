@@ -29,6 +29,11 @@
 #define KERNEL_PRINTF_HOST_ADDR 0
 #define KERNEL_RESERVED_U16 0
 
+// stack words of a warp's lanes are interleaved: word i of lane l is at 4 * (STACK_WORD_STRIDE * i + l).
+// Kernels and everything linked into them are compiled with -mllvm -riscv-stack-word-stride of this.
+#define STACK_WORD_STRIDE 32
+
+#define CSR_LANE_ID 0xcc0
 #define CSR_BLOCK_IDX_X 0xfc3
 #define CSR_BLOCK_IDX_Y 0xfc4
 #define CSR_BLOCK_IDX_Z 0xfc5
