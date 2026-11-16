@@ -2,8 +2,6 @@
 
 #define GPU_DRAM_SIZE (1ULL << 32) // 4GB
 
-#define KERNEL_STACK_SIZE (1 << 22) // 4MB
-#define KERNEL_TLS_SIZE (1 << 22) // 4MB
 
 // all below offset by gpu mem start addr
 #define KERNEL_HEADER_MEM_START_PC 0 // [0:3], 4 bytes
@@ -31,9 +29,30 @@
 
 // stack words of a warp's lanes are interleaved: word i of lane l is at 4 * (STACK_WORD_STRIDE * i + l).
 // Kernels and everything linked into them are compiled with -mllvm -riscv-stack-word-stride of this.
-#define STACK_WORD_STRIDE 32
+#define STACK_WORD_STRIDE_SHIFT 5
+#define STACK_WORD_STRIDE (1 << STACK_WORD_STRIDE_SHIFT)
+
+// One stack region serves every kernel: only as many threads as the hardware has slots run at once,
+// so _start carves it by slot.  A warp slot is an (SM, core, warp), a thread slot one of its lanes.
+// The region holds the warp slots' interleaved stacks, then the thread slots' data stacks, then
+// their TLS.
+#define MAX_WARP_SLOTS 64     // SMs * cores * warps the region is sized for
+#define WARP_STACK_SHIFT 15   // interleaved stack per warp slot: 32 KB, 256 words per thread
+#define THREAD_STACK_SHIFT 10 // data stack per thread slot: 1 KB
+#define THREAD_TLS_SHIFT 4    // TLS per thread slot: 16 bytes
+#define WARP_STACKS_SIZE (MAX_WARP_SLOTS << WARP_STACK_SHIFT)
+#define THREAD_STACKS_SIZE ((MAX_WARP_SLOTS << STACK_WORD_STRIDE_SHIFT) << THREAD_STACK_SHIFT)
+#define THREAD_TLS_SIZE ((MAX_WARP_SLOTS << STACK_WORD_STRIDE_SHIFT) << THREAD_TLS_SHIFT)
+#define STACK_REGION_SIZE (WARP_STACKS_SIZE + THREAD_STACKS_SIZE + THREAD_TLS_SIZE)
+// 16 stack bytes are 4 words: frames keep their alignment, and va_arg reads a word's parity off its address
+#define STACK_REGION_ALIGN (16 * STACK_WORD_STRIDE)
 
 #define CSR_LANE_ID 0xcc0
+#define CSR_WARP_ID 0xcc1
+#define CSR_CORE_ID 0xcc2
+#define CSR_CLUSTER_ID 0xcd0
+#define CSR_NUM_WARPS 0xfc1 // per core
+#define CSR_NUM_CORES 0xfc2 // per SM
 #define CSR_BLOCK_IDX_X 0xfc3
 #define CSR_BLOCK_IDX_Y 0xfc4
 #define CSR_BLOCK_IDX_Z 0xfc5
