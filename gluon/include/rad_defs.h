@@ -71,6 +71,10 @@
 #if defined(__riscv) && !defined(__ASSEMBLER__)
 #define __shared __attribute__((address_space(1))) // lowers loads/stores to .shared
 
+// marks a kernel, a function that can be launched.  Kernels go in their own section, which is how
+// the ELF loader tells them from ordinary functions.
+#define __kernel__ __attribute__((section("rad_kernels")))
+
 // vx_bar across the whole CTA
 __attribute__((convergent)) static inline void __syncthreads() {
     asm volatile(".insn r 0x0b, 4, 0, x0, x0, x0" ::: "memory");
