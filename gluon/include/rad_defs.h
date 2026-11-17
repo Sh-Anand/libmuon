@@ -55,6 +55,21 @@
 // the ELF loader tells them from ordinary functions.
 #define __kernel__ __attribute__((section("rad_kernels")))
 
+// Launch a grid of `kernel` from this thread: (gx, gy, gz) CTAs of (bx, by, bz) threads, each with
+// `smem` bytes of shared memory.  `params` is its params block, which must stay in place until the
+// launched threads have started.  The launching thread does not wait.  The kernel's id is filled in
+// when the ELF is loaded, from the pair this leaves in .rad.launches: {the instruction, the kernel}.
+#define rad_launch(kernel, gx, gy, gz, bx, by, bz, smem, params)                                    \
+    do {                                                                                             \
+        unsigned _w0 = (unsigned)(params), _w1 = (gx) | (gy) << 16, _w2 = (gz) | ((bz) - 1) << 24, \
+                 _w3 = ((bx) - 1) | ((by) - 1) << 10 | ((smem) + 15) / 16 << 20;                    \
+        asm volatile("1: vx_launch 0, %0, %1, %2, %3\n"                                             \
+                     ".pushsection .rad.launches,\"\",@progbits\n"                                  \
+                     ".word 1b, " #kernel "\n"                                                      \
+                     ".popsection"                                                                   \
+                     : : "r"(_w0), "r"(_w1), "r"(_w2), "r"(_w3) : "memory");                         \
+    } while (0)
+
 // vx_bar across the whole CTA
 __attribute__((convergent)) static inline void __syncthreads() {
     asm volatile(".insn r 0x0b, 4, 0, x0, x0, x0" ::: "memory");
