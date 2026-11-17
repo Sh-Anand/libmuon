@@ -2,30 +2,9 @@
 
 #define GPU_DRAM_SIZE (1ULL << 32) // 4GB
 
-
-// all below offset by gpu mem start addr
-#define KERNEL_HEADER_MEM_START_PC 0 // [0:3], 4 bytes
-#define KERNEL_HEADER_MEM_KERNEL_PC (KERNEL_HEADER_MEM_START_PC + 4) // [4:7], 4 bytes
-#define KERNEL_HEADER_MEM_PARAMS_SZ (KERNEL_HEADER_MEM_KERNEL_PC + 4) // [8:11], 4 bytes
-#define KERNEL_HEADER_MEM_STACK_BASE_ADDR (KERNEL_HEADER_MEM_PARAMS_SZ + 4) // [12:15], 4 bytes
-#define KERNEL_HEADER_MEM_TLS_BASE_ADDR (KERNEL_HEADER_MEM_STACK_BASE_ADDR + 4) // [16:19], 4 bytes
-#define KERNEL_HEADER_MEM_GRID_X (KERNEL_HEADER_MEM_TLS_BASE_ADDR + 4) // [20:23], 4 bytes
-#define KERNEL_HEADER_MEM_GRID_Y (KERNEL_HEADER_MEM_GRID_X + 4) // [24:27], 4 bytes
-#define KERNEL_HEADER_MEM_GRID_Z (KERNEL_HEADER_MEM_GRID_Y + 4) // [28:31], 4 bytes
-#define KERNEL_HEADER_MEM_BLOCK_X (KERNEL_HEADER_MEM_GRID_Z + 4) // [32:35], 4 bytes
-#define KERNEL_HEADER_MEM_BLOCK_Y (KERNEL_HEADER_MEM_BLOCK_X + 4) // [36:39], 4 bytes
-#define KERNEL_HEADER_MEM_BLOCK_Z (KERNEL_HEADER_MEM_BLOCK_Y + 4) // [40:43], 4 bytes
-#define KERNEL_HEADER_MEM_PRINTF_HOST_ADDR (KERNEL_HEADER_MEM_BLOCK_Z + 4) // [44:47], 4 bytes
-#define KERNEL_HEADER_MEM_REGS_PER_THREAD (KERNEL_HEADER_MEM_PRINTF_HOST_ADDR + 4) // [48:48], 1 byte
-#define KERNEL_HEADER_MEM_SMEM_PER_BLOCK (KERNEL_HEADER_MEM_REGS_PER_THREAD + 1) // [49:52], 4 bytes
-#define KERNEL_HEADER_MEM_FLAGS (KERNEL_HEADER_MEM_SMEM_PER_BLOCK + 4) // [53:53], 1 byte
-#define KERNEL_HEADER_MEM_PADDING (4 - ((KERNEL_HEADER_MEM_FLAGS + 1) & 3)) // [54:55], 2 bytes of padding for 4 byte alignment
-#define KERNEL_HEADER_MEM_END (KERNEL_HEADER_MEM_FLAGS + 1 + KERNEL_HEADER_MEM_PADDING) // [56] 
-
-#define KERNEL_REGS_PER_THREAD 1
-#define KERNEL_FLAGS 0
-#define KERNEL_PRINTF_HOST_ADDR 0
-#define KERNEL_RESERVED_U16 0
+// A kernel's params block, which CSR_BP points a thread at: the params' size in bytes, then the params.
+#define PARAMS_SIZE 0
+#define PARAMS_START 4
 
 // stack words of a warp's lanes are interleaved: word i of lane l is at 4 * (STACK_WORD_STRIDE * i + l).
 // Kernels and everything linked into them are compiled with -mllvm -riscv-stack-word-stride of this.
@@ -59,9 +38,10 @@
 #define CSR_THREAD_IDX_X 0xfc6
 #define CSR_THREAD_IDX_Y 0xfc7
 #define CSR_THREAD_IDX_Z 0xfc8
-#define CSR_BP 0xfc9
+#define CSR_BP 0xfc9 // this kernel's params block
 #define CSR_CMD_ID_LO 0xfcb // unique id of the launching command: stream id << 56 | per-stream command id
 #define CSR_CMD_ID_HI 0xfcc
+#define CSR_KERNEL_PC 0xfcd // the kernel _start jumps to
 
 #define HW_STREAM_COUNT 4
 

@@ -44,8 +44,8 @@ _start:
     add tp, t0, a0 // tls pointer
 
 // setup params: words past the first 8 go on the stack, then the first 8 into a0-a7
-    lw t0, KERNEL_HEADER_MEM_PARAMS_SZ(t2)
-    addi t1, t2, KERNEL_HEADER_MEM_END // params start
+    lw t0, PARAMS_SIZE(t2)
+    addi t1, t2, PARAMS_START // params start
     add t0, t1, t0 // params end
     addi a0, t1, 32 // first stack param
     mv a1, sp
@@ -59,7 +59,7 @@ setup_params_stack:
     j setup_params_stack
 
 setup_params_regs:
-    lw t2, KERNEL_HEADER_MEM_KERNEL_PC(t2)
+    csrr t2, CSR_KERNEL_PC
     beq t1, t0, launch_kernel
     lw a0, 0(t1)
     addi t1, t1, 4
