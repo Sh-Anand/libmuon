@@ -6,6 +6,12 @@
 #define PARAMS_SIZE 0
 #define PARAMS_START 4
 
+// The launch queue: a ring of launch entries in device memory, where the command processor keeps
+// launches while all its launch slots are busy.
+#define LAUNCH_QUEUE_SLOTS 1024
+#define LAUNCH_ENTRY_BYTES 16
+#define LAUNCH_QUEUE_ALIGN 128 // a cache line
+
 // stack words of a warp's lanes are interleaved: word i of lane l is at 4 * (STACK_WORD_STRIDE * i + l).
 // Kernels and everything linked into them are compiled with -mllvm -riscv-stack-word-stride of this.
 #define STACK_WORD_STRIDE_SHIFT 5
