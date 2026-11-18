@@ -94,3 +94,10 @@ launch_kernel:
 .global rad_stack_region
 rad_stack_region:
     .word 0
+// the params ring: its base, set by the host as above, and the tail device launches add to
+.global rad_params_ring
+rad_params_ring:
+    .word 0
+.global rad_params_tail
+rad_params_tail:
+    .word 0

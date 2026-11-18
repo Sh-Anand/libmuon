@@ -12,6 +12,10 @@
 #define LAUNCH_ENTRY_BYTES 16
 #define LAUNCH_QUEUE_ALIGN 128 // a cache line
 
+// The params ring: device memory that device launches take their params blocks from.  One shared tail
+// hands its bytes out, so a block is overwritten once this many more bytes have been taken.
+#define PARAMS_RING_BYTES (1 << 17) // a power of two
+
 // stack words of a warp's lanes are interleaved: word i of lane l is at 4 * (STACK_WORD_STRIDE * i + l).
 // Kernels and everything linked into them are compiled with -mllvm -riscv-stack-word-stride of this.
 #define STACK_WORD_STRIDE_SHIFT 5
@@ -65,7 +69,7 @@
 // `smem` bytes of shared memory.  `params` is its params block, which must stay in place until the
 // launched threads have started.  The launching thread does not wait.  The kernel's id is filled in
 // when the ELF is loaded, from the pair this leaves in .rad.launches: {the instruction, the kernel}.
-#define rad_launch(kernel, gx, gy, gz, bx, by, bz, smem, params)                                    \
+#define rad_launch_at(kernel, gx, gy, gz, bx, by, bz, smem, params)                                 \
     do {                                                                                             \
         unsigned _w0 = (unsigned)(params), _w1 = (gx) | (gy) << 16, _w2 = (gz) | ((bz) - 1) << 24, \
                  _w3 = ((bx) - 1) | ((by) - 1) << 10 | ((smem) + 15) / 16 << 20;                    \
@@ -75,6 +79,38 @@
                      ".popsection"                                                                   \
                      : : "r"(_w0), "r"(_w1), "r"(_w2), "r"(_w3) : "memory");                         \
     } while (0)
+
+// *p += v in one step, among all threads; the value it had
+static inline unsigned rad_atomic_add(unsigned *p, unsigned v) {
+    unsigned old;
+    asm volatile(".option push\n.option arch, +a\namoadd.w %0, %2, (%1)\n.option pop"
+                 : "=&r"(old) : "r"(p), "r"(v) : "memory");
+    return old;
+}
+
+// the params ring's base, which the host sets in the image, and its tail
+extern unsigned rad_params_ring __attribute__((visibility("hidden")));
+extern unsigned rad_params_tail __attribute__((visibility("hidden")));
+
+// `bytes` of the params ring, a multiple of 4
+static inline unsigned *rad_params_alloc(unsigned bytes) {
+    return (unsigned *)(rad_params_ring + (rad_atomic_add(&rad_params_tail, bytes) & (PARAMS_RING_BYTES - 1)));
+}
+
+#ifdef __cplusplus
+// a params block in the ring holding `args`, each padded to a word
+template <class... A> static inline unsigned *rad_params_block(A... args) {
+    unsigned bytes = (0 + ... + ((sizeof(A) + 3) & ~3u));
+    unsigned *p = rad_params_alloc(PARAMS_START + bytes), *q = p + PARAMS_START / 4;
+    p[PARAMS_SIZE / 4] = bytes;
+    ((__builtin_memcpy(q, &args, sizeof args), q += (sizeof args + 3) / 4), ...);
+    return p;
+}
+
+// rad_launch_at with the launched kernel's arguments, which go in a block of the params ring
+#define rad_launch(kernel, gx, gy, gz, bx, by, bz, smem, ...) \
+    rad_launch_at(kernel, gx, gy, gz, bx, by, bz, smem, rad_params_block(__VA_ARGS__))
+#endif
 
 // vx_bar across the whole CTA
 __attribute__((convergent)) static inline void __syncthreads() {
