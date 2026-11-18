@@ -88,6 +88,14 @@ static inline unsigned rad_atomic_add(unsigned *p, unsigned v) {
     return old;
 }
 
+// *p = v in one step, among all threads; the value it had
+static inline unsigned rad_atomic_swap(unsigned *p, unsigned v) {
+    unsigned old;
+    asm volatile(".option push\n.option arch, +a\namoswap.w %0, %2, (%1)\n.option pop"
+                 : "=&r"(old) : "r"(p), "r"(v) : "memory");
+    return old;
+}
+
 // the params ring's base, which the host sets in the image, and its tail
 extern unsigned rad_params_ring __attribute__((visibility("hidden")));
 extern unsigned rad_params_tail __attribute__((visibility("hidden")));
