@@ -125,6 +125,25 @@ __attribute__((convergent)) static inline void __syncthreads() {
     asm volatile(".insn r 0x0b, 4, 0, x0, x0, x0" ::: "memory");
 }
 
+// Warp matrix multiply, C += A * B, by the warp's 32 threads at once: A is 16x16 and B 16x8 in bf16, C is
+// 16x8 in fp32.  Each thread holds a share of every matrix, laid out as in Nvidia's mma.m16n8k16.  With
+// g = lane / 4 and t = lane % 4, and a bf16 word's first element in its low half:
+//   a[0]: A[g][2t], A[g][2t+1]        a[1]: A[g+8][2t], A[g+8][2t+1]
+//   a[2]: A[g][2t+8], A[g][2t+9]      a[3]: A[g+8][2t+8], A[g+8][2t+9]
+//   b[0]: B[2t][g], B[2t+1][g]        b[1]: B[2t+8][g], B[2t+9][g]
+//   c[0]: C[g][2t]    c[1]: C[g][2t+1]    c[2]: C[g+8][2t]    c[3]: C[g+8][2t+1]
+// Every thread of the warp must call it together.  vx_mma names the first register of each matrix and
+// takes the ones after it, so the shares go in fixed registers; the result replaces C
+__attribute__((convergent)) static inline void rad_mma_bf16(float c[4], const unsigned a[4], const unsigned b[2]) {
+    register unsigned a0 asm("x112") = a[0], a1 asm("x113") = a[1], a2 asm("x114") = a[2], a3 asm("x115") = a[3];
+    register unsigned b0 asm("x116") = b[0], b1 asm("x117") = b[1];
+    register float c0 asm("x118") = c[0], c1 asm("x119") = c[1], c2 asm("x120") = c[2], c3 asm("x121") = c[3];
+    asm volatile("vx_mma.bf16 x118, x112, x116, x118"
+                 : "+r"(c0), "+r"(c1), "+r"(c2), "+r"(c3)
+                 : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(b0), "r"(b1));
+    c[0] = c0, c[1] = c1, c[2] = c2, c[3] = c3;
+}
+
 // this thread's index within its block, and its block's index within the grid
 #define RAD_IDX(name, csr) \
     static inline unsigned name(void) { unsigned v; asm volatile("csrr %0, %1" : "=r"(v) : "i"(csr)); return v; }
